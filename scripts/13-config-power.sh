@@ -9,6 +9,7 @@ chroot rootdir systemctl mask sleep.target suspend.target hibernate.target hybri
 # 在 Ubuntu / Kali 构建时配置 NetworkManager 使用 netplan 渲染器
 if [[ "$SYSTEM_TYPE" == *"ubuntu-"* || "$SYSTEM_TYPE" == *"kali-"* ]]; then
     echo "[$(date +'%Y-%m-%d %H:%M:%S')] [13]   └─ 配置 NetworkManager"
+    mkdir -p rootdir/etc/netplan
     cat > rootdir/etc/netplan/01-network-manager-all.yaml << 'EOF'
 network:
   version: 2
