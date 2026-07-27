@@ -251,9 +251,15 @@ jobs:
                 echo "[$(date +'%Y-%m-%d %H:%M:%S')]   安装 kali-archive-keyring..."
                 sudo apt-get update
                 sudo apt-get install -y kali-archive-keyring || {
-                  echo "[$(date +'%Y-%m-%d %H:%M:%S')]   无法从当前源安装 kali-archive-keyring，尝试从 Kali 仓库下载..."
-                  curl -fsSL http://http.kali.org/pool/main/k/kali-archive-keyring/kali-archive-keyring_2024.1_all.deb -o /tmp/kali-archive-keyring.deb || \
-                  curl -fsSL http://http.kali.org/pool/main/k/kali-archive-keyring/kali-archive-keyring_2022.1_all.deb -o /tmp/kali-archive-keyring.deb
+                  echo "[$(date +'%Y-%m-%d %H:%M:%S')]   无法从当前源安装 kali-archive-keyring，尝试从镜像下载..."
+                  KALI_KEYRING_DEB=$(curl -fsSL http://http.kali.org/pool/main/k/kali-archive-keyring/ | grep -oE 'kali-archive-keyring_[0-9]+\.[0-9]+_all\.deb' | sort -V | tail -n 1)
+                  if [ -z "$KALI_KEYRING_DEB" ]; then
+                    echo "[$(date +'%Y-%m-%d %H:%M:%S')]   错误: 无法从 Kali 仓库索引获取 kali-archive-keyring 最新版本" >&2
+                    exit 1
+                  fi
+                  echo "[$(date +'%Y-%m-%d %H:%M:%S')]   下载 $KALI_KEYRING_DEB ..."
+                  curl -fsSL "https://mirrors.tuna.tsinghua.edu.cn/kali/pool/main/k/kali-archive-keyring/$KALI_KEYRING_DEB" -o /tmp/kali-archive-keyring.deb || \
+                  curl -fsSL "http://http.kali.org/pool/main/k/kali-archive-keyring/$KALI_KEYRING_DEB" -o /tmp/kali-archive-keyring.deb
                   sudo dpkg -i /tmp/kali-archive-keyring.deb || true
                   sudo apt-get install -fy
                 }
@@ -274,9 +280,15 @@ jobs:
                 echo "[$(date +'%Y-%m-%d %H:%M:%S')]   安装 kali-archive-keyring..."
                 sudo apt-get update
                 sudo apt-get install -y kali-archive-keyring || {
-                  echo "[$(date +'%Y-%m-%d %H:%M:%S')]   无法从当前源安装 kali-archive-keyring，尝试从 Kali 仓库下载..."
-                  curl -fsSL http://http.kali.org/pool/main/k/kali-archive-keyring/kali-archive-keyring_2024.1_all.deb -o /tmp/kali-archive-keyring.deb || \
-                  curl -fsSL http://http.kali.org/pool/main/k/kali-archive-keyring/kali-archive-keyring_2022.1_all.deb -o /tmp/kali-archive-keyring.deb
+                  echo "[$(date +'%Y-%m-%d %H:%M:%S')]   无法从当前源安装 kali-archive-keyring，尝试从镜像下载..."
+                  KALI_KEYRING_DEB=$(curl -fsSL http://http.kali.org/pool/main/k/kali-archive-keyring/ | grep -oE 'kali-archive-keyring_[0-9]+\.[0-9]+_all\.deb' | sort -V | tail -n 1)
+                  if [ -z "$KALI_KEYRING_DEB" ]; then
+                    echo "[$(date +'%Y-%m-%d %H:%M:%S')]   错误: 无法从 Kali 仓库索引获取 kali-archive-keyring 最新版本" >&2
+                    exit 1
+                  fi
+                  echo "[$(date +'%Y-%m-%d %H:%M:%S')]   下载 $KALI_KEYRING_DEB ..."
+                  curl -fsSL "https://mirrors.tuna.tsinghua.edu.cn/kali/pool/main/k/kali-archive-keyring/$KALI_KEYRING_DEB" -o /tmp/kali-archive-keyring.deb || \
+                  curl -fsSL "http://http.kali.org/pool/main/k/kali-archive-keyring/$KALI_KEYRING_DEB" -o /tmp/kali-archive-keyring.deb
                   sudo dpkg -i /tmp/kali-archive-keyring.deb || true
                   sudo apt-get install -fy
                 }
