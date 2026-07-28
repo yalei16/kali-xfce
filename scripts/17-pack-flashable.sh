@@ -71,14 +71,14 @@ echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   └─ $IMAGE_NAME  ->  system.img (
 if ! command -v img2simg >/dev/null 2>&1; then
     echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   ⚠️  安装 img2simg..."
     sudo apt-get update -qq
-    sudo apt-get install -y -qq android-tools-fsutils 2>/dev/null || sudo apt-get install -y -qq img2simg 2>/dev/null || true
+    sudo apt-get install -y -qq android-sdk-libsparse-utils 2>/dev/null || true
 fi
 if command -v img2simg >/dev/null 2>&1; then
     img2simg "$IMAGE_NAME" "$WORK_DIR/system.img"
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   └─ sparse 转换完成"
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   └─ sparse 转换完成 ($(du -h "$WORK_DIR/system.img" | cut -f1))"
 else
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   ⚠️  img2simg 不可用，回退为 raw (刷机会变慢)"
-    ln -f "$IMAGE_NAME" "$WORK_DIR/system.img" 2>/dev/null || cp "$IMAGE_NAME" "$WORK_DIR/system.img"
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   ❌ img2simg 仍然不可用"
+    exit 1
 fi
 # ---------- 生成卡刷包 ----------
 OUT="$(pwd)/$FLASHABLE_ZIP"
