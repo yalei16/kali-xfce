@@ -57,19 +57,29 @@ WORK_DIR="$(pwd)/.pack-build"
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR"
 
-# 复制模板 (META-INF / boot.img / firmware-update 等)
+# 复制模板
 cp -r "$PACK_SRC"/. "$WORK_DIR"/
 
-# vendor(/boot, ext4) -> vendor.img, cust(EFI) -> firmware-update/cust.img, rootfs -> system.img
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   └─ $BOOT_IMG  ->  vendor.img"
 ln -f "$BOOT_IMG" "$WORK_DIR/vendor.img" 2>/dev/null || cp "$BOOT_IMG" "$WORK_DIR/vendor.img"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   └─ $EFI_IMG  ->  firmware-update/cust.img"
 ln -f "$EFI_IMG" "$WORK_DIR/firmware-update/cust.img" 2>/dev/null || cp "$EFI_IMG" "$WORK_DIR/firmware-update/cust.img"
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   └─ $IMAGE_NAME  ->  system.img"
-ln -f "$IMAGE_NAME" "$WORK_DIR/system.img" 2>/dev/null || cp "$IMAGE_NAME" "$WORK_DIR/system.img"
-
+# FIX: raw ext4 → sparse，TWRP 刷 userdata 需要 sparse 格式
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   └─ $IMAGE_NAME  ->  system.img (sparse)"
+if ! command -v img2simg >/dev/null 2>&1; then
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   ⚠️  安装 img2simg..."
+    sudo apt-get update -qq
+    sudo apt-get install -y -qq android-tools-fsutils 2>/dev/null || sudo apt-get install -y -qq img2simg 2>/dev/null || true
+fi
+if command -v img2simg >/dev/null 2>&1; then
+    img2simg "$IMAGE_NAME" "$WORK_DIR/system.img"
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   └─ sparse 转换完成"
+else
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] [17]   ⚠️  img2simg 不可用，回退为 raw (刷机会变慢)"
+    ln -f "$IMAGE_NAME" "$WORK_DIR/system.img" 2>/dev/null || cp "$IMAGE_NAME" "$WORK_DIR/system.img"
+fi
 # ---------- 生成卡刷包 ----------
 OUT="$(pwd)/$FLASHABLE_ZIP"
 rm -f "$OUT"
