@@ -116,6 +116,11 @@ echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 
 "$SCRIPT_DIR/scripts/14-config-zram.sh"
 "$SCRIPT_DIR/scripts/15-cleanup.sh"
 "$SCRIPT_DIR/scripts/16-finalize.sh"
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] [99] 🔍 强制检查修复文件系统"
+sync
+umount rootdir || true
+e2fsck -f -y rootfs.img || true
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] [99] ✅ 文件系统检查完成"
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] ========================================== 🎉 构建完成 🎉 =========================================="
 
 # 打包 Recovery 卡刷包: vendor(/boot ext4), cust(EFI), rootfs->system.img, 结合 pack/ 模板
